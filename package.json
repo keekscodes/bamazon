@@ -18,7 +18,10 @@
   },
   "homepage": "https://github.com/kamueller2/bamazon#readme",
   "dependencies": {
+    "chalk": "^2.4.2",
+    "cli-table3": "^0.5.1",
     "dotenv": "^8.0.0",
+    "figlet": "^1.2.3",
     "inquirer": "^6.4.1",
     "mysql": "^2.17.1"
   },
