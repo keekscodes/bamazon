@@ -26,22 +26,23 @@ const init = () => {
                 verticalLayout: "default"
             })
         )
-    );
+    )
 }
 
 
 // // Create connection & load the products
-connection.connect(function(err) {
-    if (err) throw err;
+connection.connect(function(error) {
+    if (error) throw error;
     // console.log("connected as id " + connection.threadId + "\n");
     init();
     loadProducts();
     // connection.end();
 });
 
+let content = [];
+
 function loadProducts() {
     connection.query('SELECT * FROM products', function(error, response) {
-        let content = [];
         var table = new Table({
             head: ['Item ID', 'Product Name', 'Department', 'Price', 'Quantity'],
             style: {
@@ -57,73 +58,53 @@ function loadProducts() {
             table.push(newRow)
             content.push(row.id)
         })
-        console.log("\n" + table.toString())
-
+        console.log("\n" + table.toString());
+        makePurchase();
     })
-
 }
 
-// function loadProducts() {
-//     connection.query("SELECT * FROM products", function(err, res) {
-//         if (err) throw err;
+function makePurchase() {
+    // ask user if they want to purchase something
+    inquirer
+        .prompt([
 
-//         // for (i = 0; i < res.length; i++) {
-//         //     let product = res[i];
-//         //     console.log(product)
-//         //         //             table.push(`Product ID: ${product.id}, ${product.product_name}, $${product.price}`);
+            {
+                name: "purchase",
+                type: "list",
+                message: "Would you like to purchase an item?",
+                choices: ["Yes", "No"]
+            },
 
+        ]).then(function(answer) {
+            if (answer.purchase === "Yes") {
+                inquirer
+                    .prompt([{
+                            name: "itemId",
+                            type: "number",
+                            message: "What is the item ID of the product you would like to purchase?",
+                            validate: function(input) {
+                                if (Number.isInteger(parseInt(input)) === true && (content.indexOf(parseFloat(input)) !== -1)) {
+                                    return true;
+                                } else console.log("\nPlease enter a valid item ID to continue.")
+                            }
+                        }, {
+                            name: "quantity",
+                            type: "input",
+                            message: "How many would you like?",
+                            validate: function(input) {
+                                if (Number.isInteger(parseInt(input)) === true) {
+                                    return true
+                                } else console.log("\nPlease enter the number of units you would like to purchase.")
+                            }
+                        },
 
-//         //     //             console.log(table);
+                    ]).then(function(answer) {
+                        var quantityNeeded = answer.Quantity;
+                        var IDrequested = answer.ID;
+                        purchaseOrder(IDrequested, quantityNeeded)
 
-//         //     //             // console.log(`Product ID: ${product.id}`);
-//         //     //             // console.log(`Product Name: ${product.product_name}`)
-//         //     //             // console.log(`Price: $${product.price}`)
-//         //     //             // console.log("-----------------------------------");
-//         // }
-//         //         console.log(`\n\n${table.toString()}\n\n`);
-//     })
-// }
+                    })
+            }
+        })
 
-
-// // function runSearch() {
-// //     inquirer
-// //         .prompt({
-// //             name: "action",
-// //             type: "list",
-// //             message: "What would you like to do?",
-// //             choices: [
-// //                 "Find songs by artist",
-// //                 "Find all artists who appear more than once",
-// //                 "Find data within a specific range",
-// //                 "Search for a specific song",
-// //                 "exit"
-// //             ]
-// //         })
-// //         .then(function(answer) {
-// //             switch (answer.action) {
-// //                 case "Find songs by artist":
-// //                     artistSearch();
-// //                     break;
-
-// //                 case "Find all artists who appear more than once":
-// //                     multiSearch();
-// //                     break;
-
-// //                 case "Find data within a specific range":
-// //                     rangeSearch();
-// //                     break;
-
-// //                 case "Search for a specific song":
-// //                     songSearch();
-// //                     break;
-
-// //                 case "exit":
-// //                     connection.end();
-// //                     break;
-// //             }
-// //         });
-// // }
-
-// console.reset = function() {
-//     return process.stdout.write('\033c');
-// }
+}
