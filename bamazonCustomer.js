@@ -102,7 +102,7 @@ function makePurchase() {
             if (answer.purchase === "Yes") {
                 inquirer
                     .prompt([{
-                            name: "itemId",
+                            name: "id",
                             type: "number",
                             message: "What is the item ID of the product you would like to purchase?",
                             validate: function(input) {
@@ -112,7 +112,7 @@ function makePurchase() {
                             }
                         }, {
                             name: "quantity",
-                            type: "input",
+                            type: "number",
                             message: "How many would you like?",
                             validate: function(input) {
                                 if (Number.isInteger(parseInt(input)) === true) {
@@ -121,30 +121,47 @@ function makePurchase() {
                             }
                         },
 
-                    ]).then(function(answer) {
-                        var quantityNeeded = answer.quantity;
-                        var IDrequested = answer.itemID;
-                        // purchaseOrder(IDrequested, quantityNeeded)
-                        // console.log(content);
+                    ]).then(selection => {
+                        const product = parseInt(selection.id);
+                        const quantity = parseInt(selection.quantity);
 
-
-
-                        if (contentQuantity[0] - quantityNeeded < 0) {
-                            console.log("insufficient quantity in our store");
-                        } else if (contentQuantity[1] - quantityNeeded < 0) {
-                            console.log("insufficient quantity in our store");
-                        } else {
-                            console.log("purchase successful")
-                        }
-
-
-
-                        connection.end();
-                    })
-            } else {
-                console.log('Thanks for visiting Bamazon');
-                connection.end();
+                        // place order for product with given id and given units to purchase
+                        placeOrder(product, quantity);
+                    });
             }
+            //         ]).then(function(answer) {
+            //             var quantityNeeded = answer.quantity;
+            //             var IDrequested = answer.itemID;
+            //             // purchaseOrder(IDrequested, quantityNeeded)
+            //             // console.log(content);
+
+
+
+            //             if (contentQuantity[0] - quantityNeeded < 0) {
+            //                 console.log("insufficient quantity in our store");
+            //             } else if (contentQuantity[1] - quantityNeeded < 0) {
+            //                 console.log("insufficient quantity in our store");
+            //             } else {
+            //                 console.log("purchase successful")
+            //             }
+
+            //             connection.end();
+            //         })
+            // } else {
+            //     console.log('Thanks for visiting Bamazon');
+            //     connection.end();
+            // }
         })
 
+}
+
+const placeOrder = function(product, quantity) {
+    // query database for product
+    connection.query(
+        "UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?", [quantity, product.item_id],
+        function(error, response) {
+            console.log("Thank you for your purchase of " + quantity + " " + product + "'s!");
+
+        }
+    )
 }
