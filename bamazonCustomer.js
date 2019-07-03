@@ -35,36 +35,59 @@ connection.connect(function(error) {
     if (error) throw error;
     // console.log("connected as id " + connection.threadId + "\n");
     init();
-    loadProducts();
+    makePurchase();
     // connection.end();
 });
 
 let content = [];
+let contentQuantity = [];
 
-function loadProducts() {
-    connection.query('SELECT * FROM products', function(error, response) {
-        var table = new Table({
-            head: ['Item ID', 'Product Name', 'Department', 'Price', 'Quantity'],
-            style: {
-                head: [] //disable colors in header cells
-                    ,
-                border: [] //disable colors for the border
-            },
-            colWidths: [20, 45, 30, 12, 12] //set the widths of each column (optional)
-        });
+// function loadProducts() {
+//     connection.query('SELECT * FROM products', function(error, response) {
+//         var table = new Table({
+//             head: ['Item ID', 'Product Name', 'Department', 'Price', 'Quantity'],
+//             style: {
+//                 head: [] //disable colors in header cells
+//                     ,
+//                 border: [] //disable colors for the border
+//             },
+//             colWidths: [20, 45, 30, 12, 12] //set the widths of each column (optional)
+//         });
 
-        response.forEach(function(row) {
-            let newRow = [row.id, row.product_name, row.department_name, "$" + row.price, row.stock_quantity]
-            table.push(newRow)
-            content.push(row.id)
-        })
-        console.log("\n" + table.toString());
-        makePurchase();
-    })
-}
+//         response.forEach(function(row) {
+//             // var q = row.stock_quantity;
+//             let newRow = [row.id, row.product_name, row.department_name, "$" + row.price, row.stock_quantity]
+//             table.push(newRow)
+//             content.push(row.stock_quantity)
+//         })
+//         console.log(row.id)
+//         console.log(row.stock_quantity)
+//         console.log("\n" + table.toString());
+//         makePurchase();
+//     })
+// }
 
 function makePurchase() {
-    // ask user if they want to purchase something
+    connection.query('SELECT * FROM products', function(error, response) {
+            var table = new Table({
+                head: ['Item ID', 'Product Name', 'Department', 'Price', 'Quantity'],
+                style: {
+                    head: [] //disable colors in header cells
+                        ,
+                    border: [] //disable colors for the border
+                },
+                colWidths: [20, 45, 30, 12, 12] //set the widths of each column (optional)
+            });
+
+            response.forEach(function(row) {
+                let newRow = [row.id, row.product_name, row.department_name, "$" + row.price, row.stock_quantity]
+                table.push(newRow)
+                content.push(row.id);
+                contentQuantity.push(row.stock_quantity);
+            })
+            console.log("\n" + table.toString());
+        })
+        // ask user if they want to purchase something
     inquirer
         .prompt([
 
@@ -99,11 +122,28 @@ function makePurchase() {
                         },
 
                     ]).then(function(answer) {
-                        var quantityNeeded = answer.Quantity;
-                        var IDrequested = answer.ID;
-                        purchaseOrder(IDrequested, quantityNeeded)
+                        var quantityNeeded = answer.quantity;
+                        var IDrequested = answer.itemID;
+                        // purchaseOrder(IDrequested, quantityNeeded)
+                        // console.log(content);
 
+
+
+                        if (contentQuantity[0] - quantityNeeded < 0) {
+                            console.log("insufficient quantity in our store");
+                        } else if (contentQuantity[1] - quantityNeeded < 0) {
+                            console.log("insufficient quantity in our store");
+                        } else {
+                            console.log("purchase successful")
+                        }
+
+
+
+                        connection.end();
                     })
+            } else {
+                console.log('Thanks for visiting Bamazon');
+                connection.end();
             }
         })
 
