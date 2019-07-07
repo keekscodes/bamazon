@@ -95,24 +95,7 @@ function placeOrder(ID, amount) {
             console.log("Your total cost for " + amount + " " + response[0].product_name + " is " + "$" + totalCost + " Thank you!");
 
             connection.query("UPDATE products SET stock_quantity = stock_quantity - " + amount + "WHERE id = " + ID);
-        } else {
-            console.log("Insufficient quantity, sorry we do not have enough " + response[0].product_name + "to complete your order.");
-        };
+        } else console.log("Sorry, insufficient quantity of the " + response[0].product_name + " to complete your order.");
         shop();
     });
 };
-
-// shop();
-
-
-
-// const placeOrder = function(product, quantity) {
-//     // query database for product
-//     connection.query(
-//         "UPDATE products SET stock_quantity = stock_quantity - ? WHERE item_id = ?", [quantity, product.item_id],
-//         function(error, response) {
-//             console.log("Thank you for your purchase of " + quantity + " " + selection.product_name + "'s!");
-
-//         }
-//     )
-// }
